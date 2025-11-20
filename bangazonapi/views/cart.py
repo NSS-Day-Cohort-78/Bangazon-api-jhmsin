@@ -118,7 +118,7 @@ class Cart(ViewSet):
             )
 
             final = {"order": serialized_order.data}
-            final["order"]["products"] = product_list.data
+            # final["order"]["products"] = product_list.data
             final["order"]["size"] = len(products_on_order)
 
         except Order.DoesNotExist as ex:

@@ -10,6 +10,7 @@ class Customer(models.Model):
     )
     phone_number = models.CharField(max_length=15)
     address = models.CharField(max_length=55)
+    likes = models.ManyToManyField("bangazonapi.Product", related_name="likes")
 
     @property
     def recommends(self):

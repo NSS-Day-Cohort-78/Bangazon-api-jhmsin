@@ -1,4 +1,5 @@
 """View module for handling requests about customer order"""
+
 import datetime
 from django.http import HttpResponseServerError
 from rest_framework.viewsets import ViewSet
@@ -8,34 +9,68 @@ from rest_framework import status
 from rest_framework.decorators import action
 from bangazonapi.models import Order, Payment, Customer, Product, OrderProduct
 from .product import ProductSerializer
+from django.db.models import Sum
 
 
 class OrderLineItemSerializer(serializers.HyperlinkedModelSerializer):
-    """JSON serializer for line items """
+    """JSON serializer for line items"""
 
     product = ProductSerializer(many=False)
 
     class Meta:
         model = OrderProduct
         url = serializers.HyperlinkedIdentityField(
-            view_name='lineitem',
-            lookup_field='id'
+            view_name="lineitem", lookup_field="id"
         )
-        fields = ('id', 'product')
+        fields = ("id", "product")
         depth = 1
+
+
+class OrderPaymentSerializer(serializers.HyperlinkedModelSerializer):
+    obscured_num = serializers.SerializerMethodField()
+
+    def get_obscured_num(self, obj):
+        stars = ["*" for i in range(len(obj.account_number) - 4)]
+        num_string = "".join(stars)
+        num_string += obj.account_number[-4:]
+        return num_string
+
+    class Meta:
+        model = Payment
+        url = serializers.HyperlinkedIdentityField(
+            view_name="payment", lookup_field="id"
+        )
+        fields = [
+            "url",
+            "obscured_num",
+        ]
+
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
     """JSON serializer for customer orders"""
 
     lineitems = OrderLineItemSerializer(many=True)
+    payment_type = OrderPaymentSerializer()
+    total = serializers.SerializerMethodField()
+
+    def get_total(self, obj):
+        price = obj.lineitems.aggregate(total=Sum("product__price"))
+
+        return round(price["total"], 2) or 0.00
 
     class Meta:
         model = Order
-        url = serializers.HyperlinkedIdentityField(
-            view_name='order',
-            lookup_field='id'
+        url = serializers.HyperlinkedIdentityField(view_name="order", lookup_field="id")
+        fields = (
+            "id",
+            "url",
+            "created_date",
+            "payment_type",
+            "customer",
+            "lineitems",
+            "total",
+            "completed_on",
         )
-        fields = ('id', 'url', 'created_date', 'payment_type', 'customer', 'lineitems')
 
 
 class Orders(ViewSet):
@@ -70,13 +105,15 @@ class Orders(ViewSet):
         try:
             customer = Customer.objects.get(user=request.auth.user)
             order = Order.objects.get(pk=pk, customer=customer)
-            serializer = OrderSerializer(order, context={'request': request})
+            serializer = OrderSerializer(order, context={"request": request})
             return Response(serializer.data)
 
-        except Order.DoesNotExist as ex:
+        except Order.DoesNotExist:
             return Response(
-                {'message': 'The requested order does not exist, or you do not have permission to access it.'},
-                status=status.HTTP_404_NOT_FOUND
+                {
+                    "message": "The requested order does not exist, or you do not have permission to access it."
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         except Exception as ex:
@@ -105,6 +142,7 @@ class Orders(ViewSet):
         customer = Customer.objects.get(user=request.auth.user)
         order = Order.objects.get(pk=pk, customer=customer)
         order.payment_type = request.data["payment_type"]
+        order.completed_on = datetime.now()
         order.save()
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)
@@ -142,11 +180,10 @@ class Orders(ViewSet):
         customer = Customer.objects.get(user=request.auth.user)
         orders = Order.objects.filter(customer=customer)
 
-        payment = self.request.query_params.get('payment_id', None)
+        payment = self.request.query_params.get("payment_id", None)
         if payment is not None:
             orders = orders.filter(payment__id=payment)
 
-        json_orders = OrderSerializer(
-            orders, many=True, context={'request': request})
+        json_orders = OrderSerializer(orders, many=True, context={"request": request})
 
         return Response(json_orders.data)

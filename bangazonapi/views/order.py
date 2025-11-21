@@ -1,6 +1,6 @@
 """View module for handling requests about customer order"""
 
-import datetime
+from datetime import date
 from django.http import HttpResponseServerError
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -142,7 +142,7 @@ class Orders(ViewSet):
         customer = Customer.objects.get(user=request.auth.user)
         order = Order.objects.get(pk=pk, customer=customer)
         order.payment_type = request.data["payment_type"]
-        order.completed_on = datetime.now()
+        order.completed_on = date.today()
         order.save()
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)

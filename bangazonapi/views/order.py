@@ -73,7 +73,7 @@ class Orders(ViewSet):
             serializer = OrderSerializer(order, context={'request': request})
             return Response(serializer.data)
 
-        except Order.DoesNotExist as ex:
+        except Order.DoesNotExist:
             return Response(
                 {'message': 'The requested order does not exist, or you do not have permission to access it.'},
                 status=status.HTTP_404_NOT_FOUND
@@ -104,7 +104,7 @@ class Orders(ViewSet):
         """
         customer = Customer.objects.get(user=request.auth.user)
         order = Order.objects.get(pk=pk, customer=customer)
-        order.payment_type = request.data["payment_type"]
+        order.payment_type_id = request.data["payment_type_id"]
         order.save()
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)

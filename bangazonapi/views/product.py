@@ -17,6 +17,15 @@ from rest_framework.parsers import MultiPartParser, FormParser
 class ProductSerializer(serializers.ModelSerializer):
     """JSON serializer for products"""
 
+    is_liked = serializers.SerializerMethodField()
+
+    def get_is_liked(self, obj):
+        user = self.context["request"].auth.user
+        if obj.likes.filter(user=user).exists():
+            return True
+        else:
+            return False
+
     class Meta:
         model = Product
         fields = (
@@ -31,6 +40,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image_path",
             "average_rating",
             "can_be_rated",
+            "is_liked",
         )
         depth = 1
 
@@ -313,7 +323,7 @@ class Products(ViewSet):
 
         return Response(None, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @action(methods=["post"], detail=True)
+    @action(methods=["post", "delete"], detail=True)
     def like(self, request, pk=None):
         """Like a product"""
         if request.method == "POST":
@@ -324,3 +334,14 @@ class Products(ViewSet):
             else:
                 customer.likes.add(product)
                 return Response(None, status=status.HTTP_204_NO_CONTENT)
+        if request.method == "DELETE":
+            customer = Customer.objects.get(user=request.auth.user)
+            product = Product.objects.get(pk=pk)
+            if customer.likes.filter(pk=pk).exists():
+                customer.likes.remove(product)
+                return Response(None, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    "You have not liked this product",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )

@@ -1,6 +1,6 @@
 """View module for handling requests about customer order"""
 
-import datetime
+from datetime import datetime
 from django.http import HttpResponseServerError
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -108,7 +108,6 @@ class Orders(ViewSet):
             serializer = OrderSerializer(order, context={"request": request})
             return Response(serializer.data)
 
-        except Order.DoesNotExist:
         except Order.DoesNotExist:
             return Response(
                 {

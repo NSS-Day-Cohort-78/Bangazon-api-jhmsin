@@ -20,10 +20,13 @@ class ProductSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
 
     def get_is_liked(self, obj):
-        user = self.context["request"].auth.user
-        if obj.likes.filter(user=user).exists():
-            return True
-        else:
+        request = self.context["request"]
+        if request.auth is None:
+            return False
+        try:
+            customer = Customer.objects.get(user=request.auth.user)
+            return obj.likes.filter(pk=customer.pk).exists()
+        except Customer.DoesNotExist:
             return False
 
     class Meta:

@@ -370,6 +370,16 @@ class ProfileProductSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "price",
+            "number_sold",
+            "description",
+            "quantity",
+            "created_date",
+            "location",
+            "image_path",
+            "average_rating",
+            "can_be_rated",
+            "category",
         )
 
 
@@ -396,6 +406,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(many=False)
     recommends = RecommenderSerializer(many=True)
+    recommendations = serializers.SerializerMethodField()
+
+    def get_recommendations(self, obj):
+        user = self.context["request"].auth.user
+        recs = Recommendation.objects.filter(customer__user=user)
+        serialized = RecommenderSerializer(recs, many=True)
+        return serialized.data
 
     class Meta:
         model = Customer
@@ -407,6 +424,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "address",
             "payment_types",
             "recommends",
+            "recommendations",
         )
         depth = 1
 

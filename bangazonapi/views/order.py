@@ -56,7 +56,10 @@ class OrderSerializer(serializers.HyperlinkedModelSerializer):
     def get_total(self, obj):
         price = obj.lineitems.aggregate(total=Sum("product__price"))
 
-        return round(price["total"], 2) or 0.00
+        if price["total"] is not None:
+            return round(price["total"], 2)
+
+        return 0.00
 
     class Meta:
         model = Order

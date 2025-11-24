@@ -74,7 +74,7 @@ class OrderTests(APITestCase):
         self.test_add_product_to_order()
 
         # Remove product from cart
-        url = "/cart/1"
+        url = "/lineitems/1"
         data = {"product_id": 1}
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.delete(url, data, format="json")

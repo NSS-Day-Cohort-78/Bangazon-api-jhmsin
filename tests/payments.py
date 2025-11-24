@@ -29,10 +29,11 @@ class PaymentTests(APITestCase):
         Ensure we can add a payment type for a customer.
         """
         # Add product to order
-        url = "/paymenttypes"
+        # breakpoint()
+        url = "/payment-types"
         data = {
-            "merchant_name": "American Express",
-            "account_number": "111-1111-1111",
+            "merchant": "American Express",
+            "acctNumber": "111-1111-1111",
             "expiration_date": "2024-12-31",
             "create_date": datetime.date.today(),
         }

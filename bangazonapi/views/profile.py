@@ -407,6 +407,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False)
     recommends = RecommenderSerializer(many=True)
     recommendations = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
 
     def get_recommendations(self, obj):
         user = self.context["request"].auth.user
@@ -414,6 +415,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         serialized = RecommenderSerializer(recs, many=True)
         return serialized.data
 
+    def get_likes(self, obj):
+        return ProfileProductSerializer(obj.likes.all(), many=True).data
+    
     class Meta:
         model = Customer
         fields = (
@@ -425,6 +429,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "payment_types",
             "recommends",
             "recommendations",
+            "likes",
         )
         depth = 1
 

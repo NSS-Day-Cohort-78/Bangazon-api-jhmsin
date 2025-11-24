@@ -45,6 +45,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "can_be_rated",
             "is_liked",
             "category",
+            "customer"
         )
         depth = 1
 

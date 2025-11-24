@@ -1,0 +1,32 @@
+[
+    {
+        "pk": 1,
+        "model": "bangazonapi.store",
+        "fields": {
+            "customer_id": 6,
+            "name": "Store 1",
+            "description": "This is the best store",
+            "product": [3, 10, 5]
+        }
+    },
+    {
+        "pk": 2,
+        "model": "bangazonapi.store",
+        "fields": {
+            "customer_id": 5,
+            "name": "Tech Haven",
+            "description": "Your one-stop shop for the latest gadgets and electronics",
+            "product": [12, 45, 78, 91]
+        }
+    },
+    {
+        "pk": 3,
+        "model": "bangazonapi.store",
+        "fields": {
+            "customer_id": 4,
+            "name": "Vintage Finds",
+            "description": "Curated collection of vintage clothing and retro accessories",
+            "product": [23, 67, 102]
+        }
+    }
+]

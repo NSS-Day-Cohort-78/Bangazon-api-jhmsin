@@ -3,17 +3,34 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
-from bangazonapi.models import Customer
+from bangazonapi.models import Customer, Product
+from django.contrib.auth.models import User
 
+class CustomerUserSerializer(serializers.ModelSerializer):
+    """JSON serializer"""
+
+    class Meta:
+        model = User
+        fields = ( 'first_name', 'last_name', )
+
+class CustomerProductSerializer(serializers.ModelSerializer):
+    """JSON serializer"""
+
+    class Meta:
+        model = Product
+        fields = ( 'quantity', )
 
 class CustomerSerializer(serializers.HyperlinkedModelSerializer):
     """JSON serializer for customers"""
+    user = CustomerUserSerializer(many=False)
+    products = CustomerProductSerializer(many=True)
+
     class Meta:
         model = Customer
         url = serializers.HyperlinkedIdentityField(
             view_name='customer', lookup_field='id'
         )
-        fields = ('id', 'url', 'user', 'phone_number', 'address')
+        fields = ('id', 'url', 'user', 'phone_number', 'address', 'products')
         depth = 1
 
 

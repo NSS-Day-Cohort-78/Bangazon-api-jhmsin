@@ -72,3 +72,16 @@ Table Recommendation {
     product_id int [ref: > Product.id]
     recommender_id int [ref: > Customer.id]
 }
+
+Table Store {
+    id int [pk, increment]
+    user_id int [ref: - User.id]
+    name varchar
+    description varchar
+}
+
+Table StoreProduct {
+    id int [pk, increment]
+    store_id int [ref: > Store.id]
+    product_id int [ref: > Product.id]
+}

@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import User
+from .customer import Customer
 
 class Store(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.DO_NOTHING,
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name='store'
     )
     name = models.CharField(max_length=155)
     description = models.TextField()

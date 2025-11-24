@@ -3,17 +3,36 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import serializers
 from bangazonapi.models import Store
 from rest_framework.response import Response
+from .customer import Customer, CustomerUserSerializer, CustomerProductSerializer
 
+# class StoreProductsSerializer(serializers.ModelSerializer):
+#     """JSON serializer"""
+#     products = CustomerProductSerializer(many=True)
 
-class StoreSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = Customer
+#         fields
+
+class StoreOwnerSerializer(serializers.ModelSerializer):
+    """JSON serializer"""
+    user = CustomerUserSerializer(many=False)
+    products = CustomerProductSerializer(many=True)
+
+    class Meta:
+        model = Customer
+        fields = ( 'id', 'user', 'products', )
+
+class StoreSerializer(serializers.ModelSerializer):
     """JSON serializer for product category"""
+    customer = StoreOwnerSerializer(many=False)
+
     class Meta:
         model = Store
         url = serializers.HyperlinkedIdentityField(
             view_name='store',
             lookup_field='id'
         )
-        fields = ( '__all__' )
+        fields = ( 'name', 'description', 'customer' )
 
 class Stores(ViewSet):
     """Request handlers for Stores"""
@@ -21,9 +40,9 @@ class Stores(ViewSet):
 
     def list(self, request):
         """Handle GET requests to Store resource"""  
-        store = Store.objects.all()  
+        stores = Store.objects.all()
 
         serializer = StoreSerializer(
-            store, many=True, context={'request': request}
+            stores, many=True, context={'request': request}
         )
         return Response(serializer.data)

@@ -283,6 +283,7 @@ class Products(ViewSet):
         number_sold = self.request.query_params.get("number_sold", None)
         min_price = self.request.query_params.get("min_price", None)
         location = self.request.query_params.get("location", None)
+        name = self.request.query_params.get("name", None)
 
         if order is not None:
             order_filter = order
@@ -301,6 +302,9 @@ class Products(ViewSet):
 
         if location is not None:
             products = products.filter(location__contains=location)
+
+        if name is not None:
+            products = products.filter(name__contains=name)
 
         if number_sold is not None:
 

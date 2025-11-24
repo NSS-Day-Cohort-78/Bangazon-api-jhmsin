@@ -373,3 +373,11 @@ class Products(ViewSet):
                     "You have not liked this product",
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            
+    @action(methods=["get"], detail=False)
+    def liked(self, request):
+        """Get all products liked by the current user"""
+        customer = Customer.objects.get(user=request.auth.user)
+        liked_products = customer.likes.all()
+        serializer = ProductSerializer(liked_products, many=True, context={"request": request})
+        return Response(serializer.data)

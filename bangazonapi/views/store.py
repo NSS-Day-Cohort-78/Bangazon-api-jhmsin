@@ -5,6 +5,7 @@ from rest_framework import serializers
 from bangazonapi.models import Store
 from rest_framework.response import Response
 from .customer import Customer, CustomerUserSerializer, CustomerProductSerializer
+from django.http import HttpResponseServerError
 
 # class StoreProductsSerializer(serializers.ModelSerializer):
 #     """JSON serializer"""
@@ -33,7 +34,7 @@ class StoreSerializer(serializers.ModelSerializer):
             view_name='store',
             lookup_field='id'
         )
-        fields = ( 'name', 'description', 'customer' )
+        fields = ( 'id', 'name', 'description', 'customer' )
 
 class Stores(ViewSet):
     """Request handlers for Stores"""
@@ -61,3 +62,26 @@ class Stores(ViewSet):
         serializer = StoreSerializer(new_store, context={"request": request})
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def destroy(self, request, pk=None):
+        try:
+            store = Store.objects.get(pk=pk)
+            store.delete()
+
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        except Store.DoesNotExist as ex:
+            return Response({"message": ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as ex:
+            return Response(
+                {"message": ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def retrieve(self, request, pk=None):
+        try:
+            store = Store.objects.get(pk=pk)
+            serializer = StoreSerializer(store, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return HttpResponseServerError(ex)

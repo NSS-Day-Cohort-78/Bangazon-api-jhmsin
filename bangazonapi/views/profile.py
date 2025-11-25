@@ -93,7 +93,7 @@ class Profile(ViewSet):
                 current_user, many=False, context={"request": request}
             )
 
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as ex:
             return HttpResponseServerError(ex)
 

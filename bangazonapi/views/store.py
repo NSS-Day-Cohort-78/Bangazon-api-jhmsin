@@ -1,26 +1,20 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework import serializers
+from rest_framework import serializers, status
 from bangazonapi.models import Store
 from rest_framework.response import Response
-from .customer import Customer, CustomerUserSerializer, CustomerProductSerializer
+from .customer import Customer, CustomerUserSerializer
+from .product import ProductSerializer
+from .product import ProductSerializer
 from django.http import HttpResponseServerError
-
-# class StoreProductsSerializer(serializers.ModelSerializer):
-#     """JSON serializer"""
-#     products = CustomerProductSerializer(many=True)
-
-#     class Meta:
-#         model = Customer
-#         fields
 
 
 class StoreOwnerSerializer(serializers.ModelSerializer):
     """JSON serializer"""
 
     user = CustomerUserSerializer(many=False)
-    products = CustomerProductSerializer(many=True)
+    products = ProductSerializer(many=True)
 
     class Meta:
         model = Customer
@@ -38,11 +32,9 @@ class StoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        url = serializers.HyperlinkedIdentityField(
-            view_name='store',
-            lookup_field='id'
-        )
-        fields = ( 'id', 'name', 'description', 'customer' )
+        url = serializers.HyperlinkedIdentityField(view_name="store", lookup_field="id")
+        fields = ("id", "name", "description", "customer")
+
 
 class Stores(ViewSet):
     """Request handlers for Stores"""
@@ -53,11 +45,9 @@ class Stores(ViewSet):
         """Handle GET requests to Store resource"""
         stores = Store.objects.all()
 
-        serializer = StoreSerializer(
-            stores, many=True, context={'request': request}
-        )
+        serializer = StoreSerializer(stores, many=True, context={"request": request})
         return Response(serializer.data)
-    
+
     def create(self, request):
         new_store = Store()
         new_store.name = request.data["name"]
@@ -71,7 +61,7 @@ class Stores(ViewSet):
         serializer = StoreSerializer(new_store, context={"request": request})
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     def destroy(self, request, pk=None):
         try:
             store = Store.objects.get(pk=pk)
@@ -86,7 +76,7 @@ class Stores(ViewSet):
             return Response(
                 {"message": ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
     def retrieve(self, request, pk=None):
         try:
             store = Store.objects.get(pk=pk)

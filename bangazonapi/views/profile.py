@@ -423,7 +423,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_store(self, obj):
         try:
             store = Store.objects.get(customer__user=self.context["request"].auth.user)
-            serialized = StoreSerializer(store, many=False)
+            serialized = StoreSerializer(store, many=False, context=self.context)
             return serialized.data
         except Store.DoesNotExist:
             return None

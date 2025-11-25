@@ -16,6 +16,15 @@ from bangazonapi.models.recommendation import Recommendation
 class ProductSerializer(serializers.ModelSerializer):
     """JSON serializer for products"""
 
+    is_liked = serializers.SerializerMethodField()
+
+    def get_is_liked(self, obj):
+        user = self.context["request"].auth.user
+        customer = Customer.objects.get(user=user)
+        if obj.likes.filter(pk=customer.pk).exists():
+            return True
+        return False
+
     class Meta:
         model = Product
         fields = (
@@ -32,6 +41,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "can_be_rated",
             "category",
             "customer",
+            "is_liked",
         )
         depth = 1
 

@@ -20,7 +20,9 @@ class ProductSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
 
     def get_is_liked(self, obj):
+
         request = self.context["request"]
+
         if request.auth is None:
             return False
         try:
@@ -374,11 +376,13 @@ class Products(ViewSet):
                     "You have not liked this product",
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
     @action(methods=["get"], detail=False)
     def liked(self, request):
         """Get all products liked by the current user"""
         customer = Customer.objects.get(user=request.auth.user)
         liked_products = customer.likes.all()
-        serializer = ProductSerializer(liked_products, many=True, context={"request": request})
+        serializer = ProductSerializer(
+            liked_products, many=True, context={"request": request}
+        )
         return Response(serializer.data)

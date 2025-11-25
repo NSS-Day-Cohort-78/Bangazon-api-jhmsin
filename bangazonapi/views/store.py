@@ -5,15 +5,8 @@ from rest_framework import serializers, status
 from bangazonapi.models import Store
 from rest_framework.response import Response
 from .customer import Customer, CustomerUserSerializer, CustomerProductSerializer
+from .product import ProductSerializer
 from django.http import HttpResponseServerError
-
-# class StoreProductsSerializer(serializers.ModelSerializer):
-#     """JSON serializer"""
-#     products = CustomerProductSerializer(many=True)
-
-#     class Meta:
-#         model = Customer
-#         fields
 
 
 class StoreOwnerSerializer(serializers.ModelSerializer):

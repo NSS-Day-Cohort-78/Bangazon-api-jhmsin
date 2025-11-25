@@ -430,6 +430,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "recommends",
             "recommendations",
             "likes",
+            "store",
         )
         depth = 1
 

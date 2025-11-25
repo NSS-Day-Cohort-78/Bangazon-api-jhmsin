@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ViewSet
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import serializers
 from bangazonapi.models import Store
@@ -46,3 +47,17 @@ class Stores(ViewSet):
             stores, many=True, context={'request': request}
         )
         return Response(serializer.data)
+    
+    def create(self, request):
+        new_store = Store()
+        new_store.name = request.data["name"]
+        new_store.description = request.data["description"]
+
+        customer = Customer.objects.get(user=request.auth.user)
+        new_store.customer = customer
+
+        new_store.save()
+
+        serializer = StoreSerializer(new_store, context={"request": request})
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

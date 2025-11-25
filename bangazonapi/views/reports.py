@@ -6,3 +6,7 @@ def expensive_products_report(request):
     context = {'products': expensive_products}
     return render(request, 'reports/expensive_products.html', context)
 
+def inexpensive_products_report(request):
+    inexpensive_products = Product.objects.filter(price__lt=1000)
+    context = {'products': inexpensive_products}
+    return render(request, 'reports/inexpensive_products.html', context)

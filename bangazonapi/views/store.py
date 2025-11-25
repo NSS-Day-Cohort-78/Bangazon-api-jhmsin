@@ -15,17 +15,25 @@ from django.http import HttpResponseServerError
 #         model = Customer
 #         fields
 
+
 class StoreOwnerSerializer(serializers.ModelSerializer):
     """JSON serializer"""
+
     user = CustomerUserSerializer(many=False)
     products = CustomerProductSerializer(many=True)
 
     class Meta:
         model = Customer
-        fields = ( 'id', 'user', 'products', )
+        fields = (
+            "id",
+            "user",
+            "products",
+        )
+
 
 class StoreSerializer(serializers.ModelSerializer):
     """JSON serializer for product category"""
+
     customer = StoreOwnerSerializer(many=False)
 
     class Meta:
@@ -38,10 +46,11 @@ class StoreSerializer(serializers.ModelSerializer):
 
 class Stores(ViewSet):
     """Request handlers for Stores"""
+
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def list(self, request):
-        """Handle GET requests to Store resource"""  
+        """Handle GET requests to Store resource"""
         stores = Store.objects.all()
 
         serializer = StoreSerializer(

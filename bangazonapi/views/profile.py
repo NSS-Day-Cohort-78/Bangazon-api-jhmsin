@@ -8,11 +8,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from bangazonapi.models import Order, Customer, Product
+from bangazonapi.models import Order, Customer, Product, Store
 from bangazonapi.models import OrderProduct, Favorite
 from bangazonapi.models import Recommendation
 from .product import ProductSerializer
 from .order import OrderSerializer
+from .store import StoreSerializer
 
 
 class Profile(ViewSet):
@@ -408,6 +409,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     recommends = RecommenderSerializer(many=True)
     recommendations = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
+    store = serializers.SerializerMethodField()
 
     def get_recommendations(self, obj):
         user = self.context["request"].auth.user
@@ -417,7 +419,15 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_likes(self, obj):
         return ProfileProductSerializer(obj.likes.all(), many=True).data
-    
+
+    def get_store(self, obj):
+        try:
+            store = Store.objects.get(customer__user=self.context["request"].auth.user)
+            serialized = StoreSerializer(store, many=False)
+            return serialized.data
+        except Store.DoesNotExist:
+            return None
+
     class Meta:
         model = Customer
         fields = (

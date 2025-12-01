@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Favorite Sellers</title>
+	</head>
+	<body>
+		<h1>Favorite Sellers</h1>
+
+		{% for customer in customers %}
+		<h2>{{customer.user.first_name}}</h2>
+		{% for favorite in favorites %} 
+		{% if favorite.customer.id == customer.id %}
+
+		<p>{{favorite.seller.name}}</p>
+		{% endif %} {% endfor %} {% endfor %}
+	</body>
+</html>

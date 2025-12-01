@@ -13,6 +13,12 @@ class Reports(ViewSet):
         context = {"products": expensive_products}
         return render(request, "reports/expensive_products.html", context)
 
+    @action(detail=False, methods=["get"], url_path="inexpensiveproducts")
+    def inexpensive_products_report(self, request):
+        inexpensive_products = Product.objects.filter(price__lt=1000)
+        context = {"products": inexpensive_products}
+        return render(request, "reports/inexpensive_products.html", context)
+
     @action(detail=False, methods=["get"], url_path="orders")
     def orders(self, request):
 

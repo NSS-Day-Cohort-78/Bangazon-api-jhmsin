@@ -35,7 +35,7 @@ class Reports(ViewSet):
 
     @action(detail=False, methods=["get"], url_path="favoritesellers")
     def favorite_sellers(self, request):
-        # all customers that have favorited a seller
+  
         favorites = Favorite.objects.prefetch_related("customer").all()
         customers = []
         for favorite in favorites:
@@ -45,4 +45,4 @@ class Reports(ViewSet):
         context = {"favorites": favorites, "customers": customers}
         return render(request, "reports/favorite_sellers.html", context)
 
-        # all the sellers they have favorited
+      

@@ -265,62 +265,80 @@ class Profile(ViewSet):
 
         return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @action(methods=["get"], detail=False)
+    @action(methods=["get", "post"], detail=False)
     def favoritesellers(self, request):
-        """
-        @api {GET} /profile/favoritesellers GET favorite sellers
-        @apiName GetFavoriteSellers
-        @apiGroup UserProfile
 
-        @apiHeader {String} Authorization Auth token
-        @apiHeaderExample {String} Authorization
-            Token 9ba45f09651c5b0c404f37a2d2572c026c146611
-
-        @apiSuccess (200) {id} id Favorite id
-        @apiSuccess (200) {Object} seller Favorited seller
-        @apiSuccess (200) {String} seller.url Seller URI
-        @apiSuccess (200) {String} seller.phone_number Seller phone number
-        @apiSuccess (200) {String} seller.address Seller address
-        @apiSuccess (200) {String} seller.user Seller user profile URI
-        @apiSuccessExample {json} Success
-            [
-                {
-                    "id": 1,
-                    "seller": {
-                        "url": "http://localhost:8000/customers/5",
-                        "phone_number": "555-1212",
-                        "address": "100 Endless Way",
-                        "user": "http://localhost:8000/users/6"
-                    }
-                },
-                {
-                    "id": 2,
-                    "seller": {
-                        "url": "http://localhost:8000/customers/6",
-                        "phone_number": "555-1212",
-                        "address": "100 Dauntless Way",
-                        "user": "http://localhost:8000/users/7"
-                    }
-                },
-                {
-                    "id": 3,
-                    "seller": {
-                        "url": "http://localhost:8000/customers/7",
-                        "phone_number": "555-1212",
-                        "address": "100 Indefatiguable Way",
-                        "user": "http://localhost:8000/users/8"
-                    }
-                }
-            ]
-        """
         customer = Customer.objects.get(user=request.auth.user)
-        favorites = Favorite.objects.filter(customer=customer)
 
-        serializer = FavoriteSerializer(
-            favorites, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
+        if request.method == "GET":
+            """
+            @api {GET} /profile/favoritesellers GET favorite sellers
+            @apiName GetFavoriteSellers
+            @apiGroup UserProfile
 
+            @apiHeader {String} Authorization Auth token
+            @apiHeaderExample {String} Authorization
+                Token 9ba45f09651c5b0c404f37a2d2572c026c146611
+
+            @apiSuccess (200) {id} id Favorite id
+            @apiSuccess (200) {Object} seller Favorited seller
+            @apiSuccess (200) {String} seller.url Seller URI
+            @apiSuccess (200) {String} seller.phone_number Seller phone number
+            @apiSuccess (200) {String} seller.address Seller address
+            @apiSuccess (200) {String} seller.user Seller user profile URI
+            @apiSuccessExample {json} Success
+                [
+                    {
+                        "id": 1,
+                        "seller": {
+                            "url": "http://localhost:8000/customers/5",
+                            "phone_number": "555-1212",
+                            "address": "100 Endless Way",
+                            "user": "http://localhost:8000/users/6"
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "seller": {
+                            "url": "http://localhost:8000/customers/6",
+                            "phone_number": "555-1212",
+                            "address": "100 Dauntless Way",
+                            "user": "http://localhost:8000/users/7"
+                        }
+                    },
+                    {
+                        "id": 3,
+                        "seller": {
+                            "url": "http://localhost:8000/customers/7",
+                            "phone_number": "555-1212",
+                            "address": "100 Indefatiguable Way",
+                            "user": "http://localhost:8000/users/8"
+                        }
+                    }
+                ]
+            """
+            favorites = Favorite.objects.filter(customer=customer)
+
+            serializer = FavoriteSerializer(
+                favorites, many=True, context={"request": request}
+            )
+            return Response(serializer.data)
+        
+        if request.method == "POST":
+            favorite_store = Favorite()
+            favorite_store.customer = customer
+            try:
+                favorite_store.seller = Store.objects.get(pk=request.data["store_id"])
+                favorite_store.save()
+
+            except Store.DoesNotExist:
+                print("Store does not exist!")
+                return Response({"error": "Store not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            print("About to save - customer_id:", favorite_store.customer.id)  # Add this
+            print("About to save - seller_id:", favorite_store.seller.id)  # Add this
+
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 class LineItemSerializer(serializers.HyperlinkedModelSerializer):
     """JSON serializer for products

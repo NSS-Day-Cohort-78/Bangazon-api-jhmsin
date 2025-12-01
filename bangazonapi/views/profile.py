@@ -335,9 +335,6 @@ class Profile(ViewSet):
                 print("Store does not exist!")
                 return Response({"error": "Store not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            print("About to save - customer_id:", favorite_store.customer.id)  # Add this
-            print("About to save - seller_id:", favorite_store.seller.id)  # Add this
-
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 class LineItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -415,6 +412,60 @@ class RecommenderSerializer(serializers.ModelSerializer):
             "customer",
         )
 
+# class FavoriteUserSerializer(serializers.HyperlinkedModelSerializer):
+#     """JSON serializer for favorite sellers user
+
+#     Arguments:
+#         serializers
+#     """
+
+#     class Meta:
+#         model = User
+#         fields = ("first_name", "last_name", "username")
+#         depth = 1
+
+# class FavoriteStoreSerializer(serializers.HyperlinkedModelSerializer):
+#     """JSON serializer for favorite sellers user
+
+#     Arguments:
+#         serializers
+#     """
+
+#     class Meta:
+#         model = Store
+#         fields = ("id")
+#         depth = 1
+
+# class FavoriteSellerSerializer(serializers.HyperlinkedModelSerializer):
+#     """JSON serializer for favorite sellers
+
+#     Arguments:
+#         serializers
+#     """
+
+#     store = StoreSerializer(many=False)
+
+#     class Meta:
+#         model = Store
+#         fields = (
+#             "store",
+#         )
+#         depth = 1
+
+class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
+    """JSON serializer for favorites
+
+    Arguments:
+        serializers
+    """
+
+    seller = StoreSerializer(many=False)
+    customer = CustomerSerializer(many=False)
+
+    class Meta:
+        model = Favorite
+        fields = ("id", "customer", "seller")
+        depth = 2
 
 class ProfileSerializer(serializers.ModelSerializer):
     """JSON serializer for customer profile
@@ -445,6 +496,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             return serialized.data
         except Store.DoesNotExist:
             return None
+    
+    # def get_favorite_stores(self, obj):
+
 
     class Meta:
         model = Customer
@@ -461,50 +515,3 @@ class ProfileSerializer(serializers.ModelSerializer):
             "store",
         )
         depth = 1
-
-
-class FavoriteUserSerializer(serializers.HyperlinkedModelSerializer):
-    """JSON serializer for favorite sellers user
-
-    Arguments:
-        serializers
-    """
-
-    class Meta:
-        model = User
-        fields = ("first_name", "last_name", "username")
-        depth = 1
-
-
-class FavoriteSellerSerializer(serializers.HyperlinkedModelSerializer):
-    """JSON serializer for favorite sellers
-
-    Arguments:
-        serializers
-    """
-
-    user = FavoriteUserSerializer(many=False)
-
-    class Meta:
-        model = Customer
-        fields = (
-            "id",
-            "url",
-            "user",
-        )
-        depth = 1
-
-
-class FavoriteSerializer(serializers.HyperlinkedModelSerializer):
-    """JSON serializer for favorites
-
-    Arguments:
-        serializers
-    """
-
-    seller = FavoriteSellerSerializer(many=False)
-
-    class Meta:
-        model = Favorite
-        fields = ("id", "seller")
-        depth = 2

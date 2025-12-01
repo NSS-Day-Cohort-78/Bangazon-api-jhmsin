@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Incomplete Orders</title>
+		<style>
+			body {
+				font-size: 1.8rem;
+			}
+			.container {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				gap: 2rem;
+			}
+			tr {
+				height: 5rem;
+			}
+
+			td,
+			th {
+				width: 15rem;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body class="container">
+		<div class="container">
+			<h1>Incomplete Orders</h1>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Order #</th>
+						<th>Customer</th>
+						<th>Created On</th>
+						<th>Price</th>
+					</tr>
+					{% for item in orders %}
+					<tr>
+						<td>{{item.id}}</td>
+						<td>{{item.customer.user.first_name}}</td>
+						<td>{{item.created_date}}</td>
+						<td>${{item.total_price}}</td>
+					</tr>
+					{%endfor%}
+				</thead>
+			</table>
+		</div>
+	</body>
+</html>

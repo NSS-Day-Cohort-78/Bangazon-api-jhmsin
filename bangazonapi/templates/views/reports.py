@@ -3,7 +3,7 @@ from django.db.models import Sum
 from django.db.models.functions import Round
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
-from bangazonapi.models import Order, Product
+from bangazonapi.models import Order, Product, Customer, Favorite
 
 
 class Reports(ViewSet):
@@ -32,3 +32,17 @@ class Reports(ViewSet):
 
             context = {"orders": incomplete_orders}
             return render(request, "reports/incomplete_orders.html", context)
+
+    @action(detail=False, methods=["get"], url_path="favoritesellers")
+    def favorite_sellers(self, request):
+        # all customers that have favorited a seller
+        favorites = Favorite.objects.prefetch_related("customer").all()
+        customers = []
+        for favorite in favorites:
+            customers.append(favorite.customer)
+
+        customers = list(set(customers))
+        context = {"favorites": favorites, "customers": customers}
+        return render(request, "reports/favorite_sellers.html", context)
+
+        # all the sellers they have favorited

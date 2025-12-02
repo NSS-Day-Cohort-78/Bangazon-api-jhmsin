@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
-from bangazonapi.models import Product, Customer, ProductCategory
+from bangazonapi.models import Product, Customer, ProductCategory, ProductRating
 from bangazonapi.models.recommendation import Recommendation
 
 
@@ -380,3 +380,21 @@ class Products(ViewSet):
             liked_products, many=True, context={"request": request}
         )
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], url_path='rate-product')
+    def rate_product(self, request, pk=None):
+        try:
+            product = Product.objects.get(pk=pk)
+            customer = Customer.objects.get(user=request.auth.user)
+            score = request.data.get('score')
+            rating = score * 100 / 5
+            ProductRating.objects.create(
+                product=product,
+                customer=customer,
+                rating=rating
+            )
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
+        except Product.DoesNotExist:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+        except Customer.DoesNotExist:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)

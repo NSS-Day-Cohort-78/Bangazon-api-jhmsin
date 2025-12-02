@@ -2,6 +2,7 @@ import json
 import datetime
 from rest_framework import status
 from rest_framework.test import APITestCase
+from bangazonapi.models import Product, Customer, ProductRating
 
 
 class ProductTests(APITestCase):
@@ -118,3 +119,36 @@ class ProductTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # TODO: Product can be rated. Assert average rating exists.
+    def test_product_can_be_rated(self):
+        
+        customer = Customer.objects.get(pk=1)
+        product = Product.objects.create(
+            name = "Kite",
+            customer= customer,
+            price = 24.99,
+            quantity = 40,
+            description = "It flies very high",
+            category_id = 1,
+            created_date = datetime.date.today(),
+            location = "Pittsburgh",
+            can_be_rated = True,
+        )
+
+        self.assertTrue(hasattr(product, 'can_be_rated'))
+        self.assertTrue(hasattr(product, 'average_rating'))
+        self.assertEqual(product.average_rating, 0)
+
+        ProductRating.objects.create(
+            customer=customer,
+            product=product,
+            rating=5
+        )
+
+        self.assertEqual(product.average_rating, 5)
+
+        ProductRating.objects.create(
+            customer=customer,
+            product=product,
+            rating=1
+        )
+        self.assertEqual(product.average_rating, 3)

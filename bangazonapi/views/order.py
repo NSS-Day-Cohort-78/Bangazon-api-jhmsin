@@ -144,7 +144,9 @@ class Orders(ViewSet):
         """
         customer = Customer.objects.get(user=request.auth.user)
         order = Order.objects.get(pk=pk, customer=customer)
-        order.payment_type = request.data["payment_type_id"]
+        # order.payment_type = request.data["payment_type_id"]
+        payment = Payment.objects.get(pk=request.data['payment_type_id'])
+        order.payment_type = payment
         order.completed_on = date.today()
         order.save()
 

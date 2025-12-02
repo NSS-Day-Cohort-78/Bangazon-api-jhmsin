@@ -1,6 +1,8 @@
 import json
 from rest_framework import status
 from rest_framework.test import APITestCase
+from bangazonapi.models import Order, Payment, Customer, OrderProduct
+from django.contrib.auth.models import User
 
 
 class OrderTests(APITestCase):
@@ -94,4 +96,38 @@ class OrderTests(APITestCase):
     # TODO: Complete order by adding payment type
 
     # TODO: New line item is not added to closed order
-    
+    def test_new_item_added_to_open_order(self):
+        url = "/cart"
+        data = {"product_id": 1}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        self.client.post(url, data, format="json")
+
+        user = User.objects.create_user(username='me', password='123')
+
+        customer = Customer.objects.create(
+            phone_number = '555-5555',
+            address = '123',
+            user = user
+        )
+
+        Payment.objects.create(
+            merchant_name = 'Visa',
+            account_number = '24ijio68948fj8439',
+            expiration_date = '2020-01-01',
+            create_date = '2019-11-11',
+            customer = customer
+        )
+
+        self.client.put('/orders/1', {'payment_type_id': 1}, format='json')
+
+        self.client.post(url, data, format="json")
+        res = self.client.get('/orders/2')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        orders = Order.objects.all()
+
+        self.assertEqual(len(orders), 2)
+
+        closed_orders = OrderProduct.objects.filter(order__id=1)
+        self.assertEqual(len(closed_orders), 1)
+

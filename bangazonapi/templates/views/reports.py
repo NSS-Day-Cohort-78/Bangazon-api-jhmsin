@@ -33,6 +33,14 @@ class Reports(ViewSet):
             context = {"orders": incomplete_orders}
             return render(request, "reports/incomplete_orders.html", context)
 
+        elif order_status is not None and order_status == "complete":
+
+            complete_orders = Order.objects.exclude(completed_on=None).annotate(
+                total_price=Round(Sum("lineitems__product__price"), 2)
+            )
+            context = {"orders": complete_orders}
+            return render(request, "reports/completed_orders.html", context)
+
     @action(detail=False, methods=["get"], url_path="favoritesellers")
     def favorite_sellers(self, request):
   
@@ -44,5 +52,3 @@ class Reports(ViewSet):
         customers = list(set(customers))
         context = {"favorites": favorites, "customers": customers}
         return render(request, "reports/favorite_sellers.html", context)
-
-      

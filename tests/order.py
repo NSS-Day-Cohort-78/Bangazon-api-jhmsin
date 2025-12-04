@@ -94,6 +94,43 @@ class OrderTests(APITestCase):
         self.assertEqual(len(json_response["lineitems"]), 0)
 
     # TODO: Complete order by adding payment type
+    def test_complete_order_by_adding_payment_type(self):
+        """
+        Ensure we can complete an order by adding a payment type.
+        """
+
+        # Add product
+        self.test_add_product_to_order()
+       
+        # Create a payment type for the current user
+        user = User.objects.get(username='steve')
+        customer = Customer.objects.get(user=user)
+
+        payment = Payment.objects.create(
+            merchant_name='American Express',
+            account_number='1234567890123456',
+            expiration_date='2025-12-31',
+            create_date='2024-01-01',
+            customer=customer
+        )
+
+        # Add payment type to order
+        url = "/orders/1"
+        data = {"payment_type_id": payment.id}
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.put(url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Get order and verify payment type was added
+        url = "/orders/1"
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.get(url, None, format="json")
+        json_response = json.loads(response.content)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(json_response["payment_type"])
+        self.assertEqual(json_response["payment_type"]["obscured_num"], "************3456")
 
     # TODO: New line item is not added to closed order
     def test_new_item_added_to_open_order(self):
